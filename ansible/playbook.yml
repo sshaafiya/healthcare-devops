@@ -1,0 +1,9 @@
+---
+- name: Deploy Healthcare App to Kubernetes
+  hosts: localhost
+  tasks:
+    - name: Apply Kubernetes Deployment
+      command: kubectl apply -f deployment.yaml
+
+    - name: Apply Kubernetes Service
+      command: kubectl apply -f service.yaml
