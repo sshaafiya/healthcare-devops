@@ -1,9 +1,23 @@
 ---
-- name: Deploy Healthcare App to Kubernetes
+- name: Deploy Healthcare App using Docker
   hosts: localhost
+  become: yes
   tasks:
-    - name: Apply Kubernetes Deployment
-      command: kubectl apply -f deployment.yaml
+    - name: Stop any existing healthcare-app container
+      shell: docker ps -q --filter "name=healthcare-app" | grep -q . && docker stop healthcare-app && docker rm healthcare-app || true
 
-    - name: Apply Kubernetes Service
-      command: kubectl apply -f service.yaml
+    - name: Remove old healthcare-app image
+      shell: docker images -q healthcare-app | grep -q . && docker rmi healthcare-app || true
+
+    - name: Build Docker image for healthcare-app
+      shell: docker build -t healthcare-app:latest ./app
+
+    - name: Run the healthcare-app container
+      shell: docker run -d -p 5000:5000 --name healthcare-app healthcare-app:latest
+
+    - name: Verify the container is running
+      shell: docker ps | grep healthcare-app
+      register: result
+
+    - debug:
+        var: result.stdout
