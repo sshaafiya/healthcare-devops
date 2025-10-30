@@ -4,7 +4,7 @@ metadata:
   name: healthcare-service
 spec:
   selector:
-    app: healthcare
+    app: healthcare-app
   ports:
     - protocol: TCP
       port: 5000

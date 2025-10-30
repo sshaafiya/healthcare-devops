@@ -1,19 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: healthcare-deployment
+  name: healthcare-app-deployment
+  labels:
+    app: healthcare-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: healthcare
+      app: healthcare-app
   template:
     metadata:
       labels:
-        app: healthcare
+        app: healthcare-app
     spec:
       containers:
-        - name: healthcare
+        - name: healthcare-app
           image: healthcare-app:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000

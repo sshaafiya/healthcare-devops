@@ -1,23 +1,31 @@
 ---
-- name: Deploy Healthcare App using Docker
+- name: Deploy Healthcare App with Docker
   hosts: localhost
-  become: yes
+  become: true
   tasks:
-    - name: Stop any existing healthcare-app container
-      shell: docker ps -q --filter "name=healthcare-app" | grep -q . && docker stop healthcare-app && docker rm healthcare-app || true
+    - name: Ensure Docker is installed
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
 
-    - name: Remove old healthcare-app image
-      shell: docker images -q healthcare-app | grep -q . && docker rmi healthcare-app || true
+    - name: Log in to Docker daemon (if needed)
+      command: docker ps
+      register: docker_status
+      ignore_errors: yes
 
-    - name: Build Docker image for healthcare-app
-      shell: docker build -t healthcare-app:latest ./app
+    - name: Build Docker image
+      command: docker build -t healthcare-app:latest ./app
+      args:
+        chdir: /var/jenkins_home/workspace/healthcare-pipeline
 
-    - name: Run the healthcare-app container
-      shell: docker run -d -p 5000:5000 --name healthcare-app healthcare-app:latest
+    - name: Stop old container if running
+      command: docker stop healthcare-app
+      ignore_errors: yes
 
-    - name: Verify the container is running
-      shell: docker ps | grep healthcare-app
-      register: result
+    - name: Remove old container if exists
+      command: docker rm healthcare-app
+      ignore_errors: yes
 
-    - debug:
-        var: result.stdout
+    - name: Run new Healthcare container
+      command: docker run -d --name healthcare-app -p 5000:5000 healthcare-app:latest
