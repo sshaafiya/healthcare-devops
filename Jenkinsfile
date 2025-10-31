@@ -23,10 +23,12 @@ pipeline {
         stage('Run Container') {
             steps {
                 script {
-                    // Stop and remove old container if it exists
-                    sh 'docker ps -q --filter "name=healthcare-app" | grep -q . && docker stop healthcare-app && docker rm healthcare-app || true'
-                    // Run new container
-                    sh 'docker run -d --name healthcare-app -p 5000:5000 $DOCKER_IMAGE'
+                    sh '''
+                        if [ "$(docker ps -q --filter name=healthcare-app)" ]; then
+                            docker stop healthcare-app && docker rm healthcare-app
+                        fi
+                        docker run -d --name healthcare-app -p 5000:5000 $DOCKER_IMAGE
+                    '''
                 }
             }
         }
@@ -41,17 +43,10 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f app/k8s/deployment.yaml'
-                sh 'kubectl apply -f app/k8s/service.yaml'
-            }
-        }
-
-        // ✅ Step 2: Verification Stage
-        stage('Verify Setup') {
-            steps {
-                echo "🔍 Checking GitHub and Kubernetes connectivity..."
-                sh 'git ls-remote https://github.com/sshaafiya/healthcare-devops.git > /dev/null && echo "✅ GitHub connection successful!"'
-                sh 'kubectl get nodes && echo "✅ Kubernetes cluster reachable!"'
+                script {
+                    sh 'kubectl apply -f k8s/deployment.yaml'
+                    sh 'kubectl apply -f k8s/service.yaml'
+                }
             }
         }
     }
