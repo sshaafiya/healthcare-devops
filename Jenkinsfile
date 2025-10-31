@@ -15,7 +15,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t $DOCKER_IMAGE ./app'
+                    sh "docker build -t ${DOCKER_IMAGE} ./app"
                 }
             }
         }
@@ -23,11 +23,12 @@ pipeline {
         stage('Run Container') {
             steps {
                 script {
+                    // Stop and remove old container if it exists
                     sh '''
-                        if [ "$(docker ps -q --filter name=healthcare-app)" ]; then
-                            docker stop healthcare-app && docker rm healthcare-app
-                        fi
-                        docker run -d --name healthcare-app -p 5000:5000 $DOCKER_IMAGE
+                    if [ "$(docker ps -q -f name=healthcare-app)" ]; then
+                        docker stop healthcare-app && docker rm healthcare-app
+                    fi
+                    docker run -d --name healthcare-app -p 5000:5000 ${DOCKER_IMAGE}
                     '''
                 }
             }
