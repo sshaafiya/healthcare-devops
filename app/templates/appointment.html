@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Appointment | HealthCare+</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js" defer></script>
+</head>
+
+<body>
+  <header>
+    <h1>HealthCare+</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="services.html">Services</a>
+      <a href="appointment.html" class="active">Appointment</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <section class="form-section">
+    <h2>Book an Appointment</h2>
+
+    <form id="appointmentForm">
+      <label for="name">Full Name:</label>
+      <input type="text" id="name" name="name" placeholder="Enter your full name" required />
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" placeholder="example@email.com" required />
+
+      <label for="date">Preferred Date:</label>
+      <input type="date" id="date" name="date" required />
+
+      <label for="department">Department:</label>
+      <select id="department" name="department" required>
+        <option value="">-- Select Department --</option>
+        <option value="General Medicine">General Medicine</option>
+        <option value="Dentistry">Dentistry</option>
+        <option value="Pediatrics">Pediatrics</option>
+        <option value="Cardiology">Cardiology</option>
+      </select>
+
+      <button type="submit" class="btn">Submit</button>
+    </form>
+
+    <p id="message"></p>
+  </section>
+
+  <footer>
+    <p>© 2025 HealthCare+. All Rights Reserved.</p>
+  </footer>
+</body>
+</html>

@@ -1,23 +1,22 @@
-from flask import Flask, jsonify, request
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
-# Sample in-memory appointment data
-appointments = []
-
-@app.route("/")
+@app.route('/')
 def home():
-    return "Welcome to Healthcare Appointment System!"
+    return render_template('index.html')
 
-@app.route("/appointments", methods=["GET"])
-def get_appointments():
-    return jsonify(appointments)
+@app.route('/appointment')
+def appointment():
+    return render_template('appointment.html')
 
-@app.route("/appointments", methods=["POST"])
-def book_appointment():
-    data = request.get_json()
-    appointments.append(data)
-    return jsonify({"message": "Appointment booked!", "data": data}), 201
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
 
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
