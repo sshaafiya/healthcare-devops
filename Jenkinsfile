@@ -2,9 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "healthcare-app"
-        DOCKER_TAG = "latest"
-        DOCKER_PATH = "./app"
+        DOCKER_IMAGE = "healthcare-app:latest"
     }
 
     stages {
@@ -16,45 +14,54 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_PATH}'
+                script {
+                    sh 'docker build -t $DOCKER_IMAGE ./app'
+                }
             }
         }
 
         stage('Run Container') {
             steps {
-                sh '''
-                docker ps -q --filter "name=healthcare-app" | grep -q . && docker stop healthcare-app && docker rm healthcare-app || true
-                docker run -d --name healthcare-app -p 5000:5000 ${DOCKER_IMAGE}:${DOCKER_TAG}
-                '''
+                script {
+                    // Stop and remove old container if it exists
+                    sh 'docker ps -q --filter "name=healthcare-app" | grep -q . && docker stop healthcare-app && docker rm healthcare-app || true'
+                    // Run new container
+                    sh 'docker run -d --name healthcare-app -p 5000:5000 $DOCKER_IMAGE'
+                }
             }
         }
 
         stage('Deploy with Ansible') {
             steps {
-                dir('ansible') {
-                    sh 'ansible-playbook playbook.yml'
+                script {
+                    sh 'ansible-playbook /var/jenkins_home/ansible/playbook.yml'
                 }
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                dir('k8s') {
-                    sh '''
-                    kubectl apply -f deployment.yaml
-                    kubectl apply -f service.yaml
-                    '''
-                }
+                sh 'kubectl apply -f app/k8s/deployment.yaml'
+                sh 'kubectl apply -f app/k8s/service.yaml'
+            }
+        }
+
+        // ✅ Step 2: Verification Stage
+        stage('Verify Setup') {
+            steps {
+                echo "🔍 Checking GitHub and Kubernetes connectivity..."
+                sh 'git ls-remote https://github.com/sshaafiya/healthcare-devops.git > /dev/null && echo "✅ GitHub connection successful!"'
+                sh 'kubectl get nodes && echo "✅ Kubernetes cluster reachable!"'
             }
         }
     }
 
     post {
         success {
-            echo "✅ Deployment Successful!"
+            echo "✅ Deployment successful!"
         }
         failure {
-            echo "❌ Deployment Failed. Please check logs."
+            echo "❌ Deployment failed! Check logs."
         }
     }
 }
